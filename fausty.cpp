@@ -22,11 +22,18 @@ void compile(std::string name)
   command << ".dsp";
   
   int returnStatus = -1234;
-  std::string cout, cerr;
+  std::string outString, errString;
   
-  Glib::spawn_command_line_sync( command.str() , &cout, &cerr, &returnStatus );
+  Glib::spawn_command_line_sync( command.str() , &outString, &errString, &returnStatus );
   
-  std::cout << "Faust returned " << returnStatus << std::endl << cout << std::endl<< std::endl << cerr << std::endl;;
+  if ( outString.size() > 0 )
+    std::cout << "Output: " << outString << endl;
+  else if ( errString.size() > 0 )
+    std::cout << "Error: " << errString << endl;
+  else
+    std::cout << "Faust compiled successfully!" << std::endl;
+  
+  return;
 }
 
 
@@ -52,8 +59,10 @@ int main(int argc, char** argv)
   Gtk::Image* image = Gtk::manage(new Gtk::Image());
   image->set( "test.svg" );
   
+  // get the file, and read it into the buffer
+  std::string dspCode = Glib::file_get_contents ( "test.dsp" );
   
-  buffer->set_text ("coin") ;
+  buffer->set_text ( dspCode );
   
   Gtk::HBox box;
   box.add(sourceview);
