@@ -109,8 +109,11 @@ GWindow::GWindow()
     cerr << "gtksourceview::SourceView::get_source_buffer () failed" << std::endl ;
   }
   
-  mainBox->pack_start( sourceview, true, true );
-  mainBox->pack_start( *image,     false, false );
+  refBuilder->get_widget("svgScrollwindow", svgScrollwindow);
+  refBuilder->get_widget("sourceviewScrollwindow", sourceviewScrollwindow);
+  
+  svgScrollwindow->add( *image );
+  sourceviewScrollwindow->add( sourceview );
   
   // get the file, and read it into the buffer
   //std::string dspCode = Glib::file_get_contents ( "test.dsp" );
@@ -158,6 +161,7 @@ void GWindow::compile()
   std::stringstream command;
   command << "faust -svg -a ";
   command << architecture;
+  command << " -cn  " << projectName; // faust classname for LV2
   command << " -o ";
   command << projectName;
   command << ".cpp ";
@@ -167,6 +171,7 @@ void GWindow::compile()
   int returnStatus = 0;
   std::string outString, errString;
   
+  cout << "compiling now with command: " << command.str() << endl;
   Glib::spawn_command_line_sync( command.str() , &outString, &errString, &returnStatus );
   
   if ( outString.size() > 0 )
@@ -208,15 +213,26 @@ void GWindow::exportCompile()
   string pkgConfigString;
   Glib::spawn_command_line_sync( pkgConfig.str() , &pkgConfigString, &errString, &returnStatus );
   
+  string additionalFlags = "";
+  string additionalOutput= "";
+  
+  if (  projectTarget == FAUST_TARGET_LV2_EFFECT ||
+        projectTarget == FAUST_TARGET_LV2_SYNTH  )
+  {
+    additionalFlags = " -shared -fPIC -O3";
+    additionalOutput = ".so ";
+  }
+  
   stringstream command;
-  command << "g++ -I/usr/lib/faust/ -lpthread ";
+  command << "g++ -I/usr/lib/faust/ " << additionalFlags << " -lpthread ";
   command << pkgConfigString;
   command << " -o ";
-  command << projectName;
+  command << projectName << additionalOutput;
   command << " ";
   command << projectName;
   command << ".cpp";
   
+  cout << "Compiling now with command: " << command.str() << endl;
   Glib::spawn_command_line_sync( command.str() , &outString, &errString, &returnStatus );
   
   if ( outString.size() > 0 )

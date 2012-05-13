@@ -61,6 +61,9 @@ class GWindow
     Gtk::Window* window;
     Gtk::Box*    windowBox;
     
+    Gtk::ScrolledWindow* svgScrollwindow;
+    Gtk::ScrolledWindow* sourceviewScrollwindow;
+    
     Gtk::Box*    topBox;
     Gtk::Box*    mainBox;
     
