@@ -42,29 +42,42 @@ GWindow::GWindow()
   refBuilder->get_widget("exportButton", exportButton);
   
   
+  compileButton->signal_clicked().connect( sigc::mem_fun( this, &GWindow::writeFile     ) );
   compileButton->signal_clicked().connect( sigc::mem_fun( this, &GWindow::compile       ) );
   compileButton->signal_clicked().connect( sigc::mem_fun( this, &GWindow::updateDiagram ) );
   
-  /*
+  exportButton->signal_clicked().connect ( sigc::mem_fun( this, &GWindow::exportCompile ) );
+  
   
   gtksourceview::init ();
-  Glib::RefPtr<gtksourceview::SourceBuffer> buffer = sourceview.get_source_buffer () ;
+  buffer = sourceview.get_source_buffer () ;
   
   if (!buffer) {
     cerr << "gtksourceview::SourceView::get_source_buffer () failed" << std::endl ;
-    return -1;
   }
+  
+  mainBox->pack_start( sourceview, true, true );
+  mainBox->pack_start( *image,     true, true );
   
   // get the file, and read it into the buffer
   //std::string dspCode = Glib::file_get_contents ( "test.dsp" );
-  //buffer->set_text ( dspCode );
   
-  */
+  buffer->set_text ( "process = +;" );
   
   projectName = "test";
   
-  
   window->show_all();
+}
+
+void GWindow::writeFile()
+{
+  bool success = g_file_set_contents( "test.dsp",
+                                      buffer->get_text().c_str(),
+                                      buffer->get_text().size(),
+                                      0 );
+  
+  cout << "Writing file = " << success << endl;
+  
 }
 
 void GWindow::compile()
@@ -79,6 +92,39 @@ void GWindow::compile()
   
   int returnStatus = 0;
   std::string outString, errString;
+  
+  Glib::spawn_command_line_sync( command.str() , &outString, &errString, &returnStatus );
+  
+  if ( outString.size() > 0 )
+    std::cout << "Output: " << outString << endl;
+  else if ( errString.size() > 0 )
+    std::cout << "Error: " << errString << endl;
+  else
+    std::cout << "Faust compiled successfully!" << std::endl;
+  
+  return;
+}
+
+void GWindow::exportCompile()
+{
+  // g++ -I/usr/lib/faust/ -lpthread `pkg-config --cflags --libs jack gtk+-2.0` -o $1 $1.cpp
+  
+  int returnStatus = 0;
+  std::string outString, errString;
+  
+  stringstream pkgConfig;
+  pkgConfig << "pkg-config --cflags --libs jack gtk+-2.0";
+  string pkgConfigString;
+  Glib::spawn_command_line_sync( pkgConfig.str() , &pkgConfigString, &errString, &returnStatus );
+  
+  stringstream command;
+  command << "g++ -I/usr/lib/faust/ -lpthread ";
+  command << pkgConfigString;
+  command << " -o ";
+  command << projectName;
+  command << " ";
+  command << projectName;
+  command << ".cpp";
   
   Glib::spawn_command_line_sync( command.str() , &outString, &errString, &returnStatus );
   

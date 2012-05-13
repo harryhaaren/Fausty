@@ -22,14 +22,19 @@ class GWindow
     Gtk::Box*    topBox;
     Gtk::Box*    mainBox;
     
+    Gtk::Label*  sideLabel;
+    
     Gtk::Button* exportButton;
     Gtk::Button* compileButton;
 
     Gtk::Image* image;
     
     gtksourceview::SourceView sourceview;
+    Glib::RefPtr<gtksourceview::SourceBuffer> buffer;
     
     void compile();
+    void writeFile();
+    void exportCompile();
     void updateDiagram();
     
   
