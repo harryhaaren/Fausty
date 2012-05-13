@@ -84,8 +84,9 @@ void GWindow::writeFile()
 
 void GWindow::compile()
 {
-  std::stringstream command;
+  cout << "Generating Faust dsp code..." << endl;
   
+  std::stringstream command;
   command << "faust -svg -a jack-gtk.cpp -o ";
   command << projectName;
   command << ".cpp ";
@@ -103,10 +104,12 @@ void GWindow::compile()
     std::cout << "Error: " << errString << endl;
   else
   {
-    std::cout << "Faust compiled successfully!" << std::endl;
+    std::cout << "SVG diagram & C++ code generated successfully!" << std::endl;
     stringstream filename;
     filename << projectName;
     filename << ".dsp";
+    
+    // store the compiled buffer, so we can compare with it later
     lastCompiledString = Glib::file_get_contents ( filename.str() );
   }
   return;
@@ -114,6 +117,8 @@ void GWindow::compile()
 
 void GWindow::exportCompile()
 {
+  cout << "Compiling C++ code now..." << endl;
+  
   // example command line to compile a faust app using the JACK GTK architecture
   // g++ -I/usr/lib/faust/ -lpthread `pkg-config --cflags --libs jack gtk+-2.0` -o $1 $1.cpp
   
@@ -141,7 +146,7 @@ void GWindow::exportCompile()
   else if ( errString.size() > 0 )
     std::cout << "Error: " << errString << endl;
   else
-    std::cout << "Faust compiled successfully!" << std::endl;
+    std::cout << "C++ code compiled into binary!" << std::endl;
   
   return;
 }
@@ -167,6 +172,8 @@ void GWindow::run()
     
     return;
   }
+  
+  
   
   // ensure that we have the lates version to run
   if ( lastCompiledString != buffer->get_text() )
