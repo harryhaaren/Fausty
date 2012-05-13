@@ -1,3 +1,14 @@
+        FAUSTY
+
+Fausty is a small, lightweight GTK IDE for developing Faust code. It is not intended to replace the existing and superior FaustWorks IDE.
+
+I wrote this little program just to gain some experience using C++ to
+spawn processes, communicate with things trough pipes etc, and also because
+I like Faust :)
+
+Feel free to get in touch, harryhaaren@gmail.com
+-Harry
+
 
 /*
   This file is part of Fausty.
@@ -16,27 +27,3 @@
   You should have received a copy of the GNU General Public License
   along with Luppp.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-// compile:  ./waf configure
-//           ./waf
-// run:      ./fausty
-
-#include <iostream>
-
-#include <gtkmm.h>
-#include "window.hpp"
-
-
-int main(int argc, char** argv)
-{
-  // setup GUI enviroment
-  Gtk::Main kit(argc, argv);
-  
-  GWindow window;
-  
-  // for spawning async processes later
-  std::string location = argv[0];
-  window.setLocation(location);
-  
-  kit.run( window.getWindow() );
-}
