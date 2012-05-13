@@ -12,7 +12,6 @@ def init(null):
   pass
 
 def configure(ctx):
-  
   ctx.check_tool ('compiler_cxx')
   
   ctx.env.CXXFLAGS = ['-pg','-g','-ldl','-Wall','-std=gnu++0x','-Wextra','-fpermissive']
@@ -23,7 +22,7 @@ def configure(ctx):
 
 def build(ctx):
   
-  sourceList = [ ]
+  sourceList = ['window.cpp']
   
   depends = 'JACK GTKMM SOURCEVIEW'
   

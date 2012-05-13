@@ -6,7 +6,8 @@
 #include <sstream>
 
 #include <gtkmm.h>
-#include <gtksourceviewmm.h>
+
+#include "window.hpp"
 
 using namespace std;
 
@@ -46,43 +47,10 @@ void updateDiagram(Gtk::Image* image)
 
 int main(int argc, char** argv)
 {
+  // setup GUI enviroment
   Gtk::Main kit(argc, argv);
   
-  gtksourceview::init () ;
+  GWindow window;
   
-  Gtk::Window window;
-  Gtk::Button button("Compile");
-  
-  Gtk::Image* image = Gtk::manage(new Gtk::Image());
-  image->set( "test.svg" );
-  
-  button.signal_clicked().connect( sigc::bind (sigc::ptr_fun( &compile       ), "test") );
-  button.signal_clicked().connect( sigc::bind (sigc::ptr_fun( &updateDiagram ), image ) );
-  
-  gtksourceview::SourceView sourceview ;
-  
-  Glib::RefPtr<gtksourceview::SourceBuffer> buffer = sourceview.get_source_buffer () ;
-  
-  if (!buffer) {
-    cerr << "gtksourceview::SourceView::get_source_buffer () failed" << std::endl ;
-    return -1;
-  }
-  
-  
-  // get the file, and read it into the buffer
-  std::string dspCode = Glib::file_get_contents ( "test.dsp" );
-  
-  buffer->set_text ( dspCode );
-  
-  Gtk::HBox box;
-  box.add(sourceview);
-  box.add(button);
-  box.add(*image);
-  
-  window.add(box);
-  window.set_default_size(400,200);
-  window.set_title("Fausty");
-  window.show_all();
-  
-  kit.run();
+  kit.run( window.getWindow() );
 }
