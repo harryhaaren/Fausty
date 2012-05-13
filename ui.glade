@@ -4,7 +4,7 @@
   <object class="GtkWindow" id="window">
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkBox" id="box1">
+      <object class="GtkBox" id="windowBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -185,6 +185,28 @@
               </packing>
             </child>
             <child>
+              <object class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="faustTargetBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="applyButton">
                 <property name="label">gtk-refresh</property>
                 <property name="use_action_appearance">False</property>
@@ -197,7 +219,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -214,7 +236,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -230,7 +252,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">5</property>
               </packing>
             </child>
           </object>
@@ -244,6 +266,7 @@
           <object class="GtkBox" id="mainBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">3</property>
             <child>
               <object class="GtkLabel" id="sideLabel">
                 <property name="visible">True</property>
@@ -272,11 +295,16 @@ Here</property>
           </packing>
         </child>
         <child>
-          <object class="GtkStatusbar" id="statusbar">
+          <object class="GtkViewport" id="viewport1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">2</property>
+            <property name="shadow_type">etched-in</property>
+            <child>
+              <object class="GtkLabel" id="errorLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>

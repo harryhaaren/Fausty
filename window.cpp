@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <gtkmm/treemodel.h>
+
 using namespace std;
 
 GWindow::GWindow()
@@ -30,13 +32,45 @@ GWindow::GWindow()
   
   // get the widgets
   refBuilder->get_widget("window", window);
-  window->set_default_size(400,200);
   window->set_title("Fausty");
+  
+  refBuilder->get_widget("windowBox", windowBox);
   
   refBuilder->get_widget("topBox", topBox);
   
   refBuilder->get_widget("mainBox", mainBox);
   
+  refBuilder->get_widget("errorLabel", errorLabel);
+  windowBox->show_all();
+  
+  // combo box widget
+  refBuilder->get_widget("faustTargetBox", faustTargetBox);
+  
+  listStore = Gtk::ListStore::create( m_Columns );
+  faustTargetBox->set_model( listStore );
+  
+  //Glib::RefPtr<Gtk::ListStore> listStore;
+  Gtk::TreeModel::Row row = *( listStore->append() );
+  row[m_Columns.m_col_id] = 0;
+  row[m_Columns.m_col_name] = "Jack GTK";
+  
+  row = *( listStore->append());
+  row[m_Columns.m_col_id] = 1;
+  row[m_Columns.m_col_name] = "LV2 Effect";
+  
+  row = *( listStore->append());
+  row[m_Columns.m_col_id] = 2;
+  row[m_Columns.m_col_name] = "LV2 Synth";
+  
+  // can show numbers beside the names, but no need
+  //faustTargetBox->pack_start(m_Columns.m_col_id);
+  faustTargetBox->pack_start(m_Columns.m_col_name);
+  faustTargetBox->set_active(0);
+  
+  faustTargetBox->signal_changed().connect( sigc::mem_fun(*this, &GWindow::targetChanged) );
+  
+  
+  // compile widgets
   refBuilder->get_widget("applyButton"  , compileButton);
   refBuilder->get_widget("compileButton", exportButton );
   refBuilder->get_widget("executeButton", executeButton);
@@ -59,15 +93,20 @@ GWindow::GWindow()
   }
   
   mainBox->pack_start( sourceview, true, true );
-  mainBox->pack_start( *image,     true, true );
+  mainBox->pack_start( *image,     false, false );
   
   // get the file, and read it into the buffer
   //std::string dspCode = Glib::file_get_contents ( "test.dsp" );
   
   buffer->set_text ( "process = +;" );
   
-  projectName = "test";
+  projectName   = "test";
+  projectTarget = FAUST_TARGET_JACK_GTK;
   
+  // get the SVG for the default buffer up
+  compile();
+  
+  window->set_default_size(650,400);
   window->show_all();
 }
 
@@ -79,15 +118,30 @@ void GWindow::writeFile()
                                       0 );
   
   cout << "Writing file = " << success << endl;
-  
 }
 
 void GWindow::compile()
 {
-  cout << "Generating Faust dsp code..." << endl;
+  cout << "Generating Faust dsp code..." << flush;
+  
+  // logic behind "faust" compiler command:
+  // are we running JACK & GTK, or LV2 targets?
+  
+  string architecture;
+  
+  switch ( projectTarget )
+  {
+    case FAUST_TARGET_JACK_GTK:     architecture = "jack-gtk.cpp"; break;
+    case FAUST_TARGET_LV2_SYNTH:    architecture = "lv2synth.cpp"; break;
+    case FAUST_TARGET_LV2_EFFECT:   architecture = "lv2.cpp";      break;
+  }
+  
+  cout << "Architecture is " << architecture << endl;
   
   std::stringstream command;
-  command << "faust -svg -a jack-gtk.cpp -o ";
+  command << "faust -svg -a ";
+  command << architecture;
+  command << " -o ";
   command << projectName;
   command << ".cpp ";
   command << projectName;
@@ -101,7 +155,11 @@ void GWindow::compile()
   if ( outString.size() > 0 )
     std::cout << "Output: " << outString << endl;
   else if ( errString.size() > 0 )
+  {
+    // faust error, send to label box
     std::cout << "Error: " << errString << endl;
+    errorLabel->set_text( errString );
+  }
   else
   {
     std::cout << "SVG diagram & C++ code generated successfully!" << std::endl;
@@ -111,6 +169,9 @@ void GWindow::compile()
     
     // store the compiled buffer, so we can compare with it later
     lastCompiledString = Glib::file_get_contents ( filename.str() );
+    
+    // clear the errors
+    errorLabel->set_text( "" );
   }
   return;
 }
@@ -213,6 +274,17 @@ void GWindow::setLocation(std::string loc)
 {
   workingDirectory = loc;
   cout << "Fausty: Working directory " << workingDirectory << endl;
+}
+
+void GWindow::targetChanged()
+{
+  // the rows in the combobox match the numbers of the Target enum, so
+  // we just set the target to a static cast of the row
+  int row = faustTargetBox->get_active_row_number();
+  
+  projectTarget = static_cast<FaustTarget>(row);
+  
+  cout << "Target changed to " << row << endl;
 }
 
 void GWindow::updateDiagram()
