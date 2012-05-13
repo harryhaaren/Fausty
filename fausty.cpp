@@ -15,7 +15,7 @@ void compile(std::string name)
 {
   std::stringstream command;
   
-  command << "faust -a jack-gtk.cpp -o ";
+  command << "faust -svg -a jack-gtk.cpp -o ";
   command << name;
   command << ".cpp ";
   command << name;
@@ -36,30 +36,9 @@ void compile(std::string name)
   return;
 }
 
-void compileSvgDiagram(Gtk::Image* image)
+void updateDiagram(Gtk::Image* image)
 {
-  std::stringstream command;
-  
-  command << "faust -svg -o ";
-  command << "test";
-  command << ".svg ";
-  command << "test";
-  command << ".dsp";
-  
-  int returnStatus = 0;
-  std::string outString, errString;
-  
-  Glib::spawn_command_line_sync( command.str() , &outString, &errString, &returnStatus );
-  
-  if ( outString.size() > 0 )
-    std::cout << "Output: " << outString << endl;
-  else if ( errString.size() > 0 )
-    std::cout << "Error: " << errString << endl;
-  else
-  {
-    std::cout << "Faust compiled successfully!" << std::endl;
-    image->set("test-svg/process.svg");
-  }
+  image->set("test-svg/process.svg");
   
   return;
 }
@@ -77,8 +56,8 @@ int main(int argc, char** argv)
   Gtk::Image* image = Gtk::manage(new Gtk::Image());
   image->set( "test.svg" );
   
-  button.signal_clicked().connect( sigc::bind (sigc::ptr_fun( &compile           ), "test") );
-  button.signal_clicked().connect( sigc::bind (sigc::ptr_fun( &compileSvgDiagram ), image ) );
+  button.signal_clicked().connect( sigc::bind (sigc::ptr_fun( &compile       ), "test") );
+  button.signal_clicked().connect( sigc::bind (sigc::ptr_fun( &updateDiagram ), image ) );
   
   gtksourceview::SourceView sourceview ;
   
