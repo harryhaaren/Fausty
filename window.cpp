@@ -3,6 +3,7 @@
 #include "window.hpp"
 
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -32,11 +33,19 @@ GWindow::GWindow()
   window->set_default_size(400,200);
   window->set_title("Fausty");
   
+  refBuilder->get_widget("topBox", topBox);
+  
+  refBuilder->get_widget("mainBox", mainBox);
+  
+  refBuilder->get_widget("applyButton", compileButton);
+  
+  refBuilder->get_widget("exportButton", exportButton);
+  
+  
+  compileButton->signal_clicked().connect( sigc::mem_fun( this, &GWindow::compile       ) );
+  compileButton->signal_clicked().connect( sigc::mem_fun( this, &GWindow::updateDiagram ) );
   
   /*
-  button.signal_clicked().connect( sigc::bind (sigc::ptr_fun( &compile       ), "test") );
-  button.signal_clicked().connect( sigc::bind (sigc::ptr_fun( &updateDiagram ), image ) );
-
   
   gtksourceview::init ();
   Glib::RefPtr<gtksourceview::SourceBuffer> buffer = sourceview.get_source_buffer () ;
@@ -52,8 +61,44 @@ GWindow::GWindow()
   
   */
   
+  projectName = "test";
+  
   
   window->show_all();
+}
+
+void GWindow::compile()
+{
+  std::stringstream command;
+  
+  command << "faust -svg -a jack-gtk.cpp -o ";
+  command << projectName;
+  command << ".cpp ";
+  command << projectName;
+  command << ".dsp";
+  
+  int returnStatus = 0;
+  std::string outString, errString;
+  
+  Glib::spawn_command_line_sync( command.str() , &outString, &errString, &returnStatus );
+  
+  if ( outString.size() > 0 )
+    std::cout << "Output: " << outString << endl;
+  else if ( errString.size() > 0 )
+    std::cout << "Error: " << errString << endl;
+  else
+    std::cout << "Faust compiled successfully!" << std::endl;
+  
+  return;
+}
+
+void GWindow::updateDiagram()
+{
+  stringstream dir;
+  dir << projectName;
+  dir << "-svg/process.svg";
+  image->set( dir.str() );
+  return;
 }
 
 Gtk::Window& GWindow::getWindow()

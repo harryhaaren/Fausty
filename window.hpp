@@ -15,8 +15,13 @@ class GWindow
     Gtk::Window& getWindow();
     
   private:
+    std::string projectName;
     
     Gtk::Window* window;
+    
+    Gtk::Box*    topBox;
+    Gtk::Box*    mainBox;
+    
     Gtk::Button* exportButton;
     Gtk::Button* compileButton;
 
@@ -24,6 +29,8 @@ class GWindow
     
     gtksourceview::SourceView sourceview;
     
+    void compile();
+    void updateDiagram();
     
   
 };
