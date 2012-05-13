@@ -37,9 +37,9 @@ GWindow::GWindow()
   
   refBuilder->get_widget("mainBox", mainBox);
   
-  refBuilder->get_widget("applyButton", compileButton);
-  
-  refBuilder->get_widget("exportButton", exportButton);
+  refBuilder->get_widget("applyButton"  , compileButton);
+  refBuilder->get_widget("compileButton", exportButton );
+  refBuilder->get_widget("executeButton", executeButton);
   
   
   compileButton->signal_clicked().connect( sigc::mem_fun( this, &GWindow::writeFile     ) );
@@ -47,6 +47,8 @@ GWindow::GWindow()
   compileButton->signal_clicked().connect( sigc::mem_fun( this, &GWindow::updateDiagram ) );
   
   exportButton->signal_clicked().connect ( sigc::mem_fun( this, &GWindow::exportCompile ) );
+  
+  executeButton->signal_clicked().connect( sigc::mem_fun( this, &GWindow::run           ) );
   
   
   gtksourceview::init ();
@@ -100,13 +102,19 @@ void GWindow::compile()
   else if ( errString.size() > 0 )
     std::cout << "Error: " << errString << endl;
   else
+  {
     std::cout << "Faust compiled successfully!" << std::endl;
-  
+    stringstream filename;
+    filename << projectName;
+    filename << ".dsp";
+    lastCompiledString = Glib::file_get_contents ( filename.str() );
+  }
   return;
 }
 
 void GWindow::exportCompile()
 {
+  // example command line to compile a faust app using the JACK GTK architecture
   // g++ -I/usr/lib/faust/ -lpthread `pkg-config --cflags --libs jack gtk+-2.0` -o $1 $1.cpp
   
   int returnStatus = 0;
@@ -136,6 +144,68 @@ void GWindow::exportCompile()
     std::cout << "Faust compiled successfully!" << std::endl;
   
   return;
+}
+
+void GWindow::run()
+{
+  // spawn or kill?
+  if ( !executeButton->get_active() )
+  {
+    cout << "Killing spawned process..." << flush;
+    
+    // doesn't seem to work...
+    Glib::spawn_close_pid(pid);
+    
+    // so do a sync call to "kill" to make sure its gone
+    int returnStatus = 0;
+    std::string outString, errString;
+    stringstream command;
+    command << "kill " << pid;
+    cout << "  running " << command.str() << flush;
+    Glib::spawn_command_line_sync( command.str() , &outString, &errString, &returnStatus );
+    cout << " :)" << endl;
+    
+    return;
+  }
+  
+  // ensure that we have the lates version to run
+  if ( lastCompiledString != buffer->get_text() )
+  {
+    writeFile();
+    compile();
+    exportCompile();
+  }
+  
+  int returnStatus = 0;
+  std::string outString, errString;
+  
+  stringstream command;
+  command << "./";
+  command << projectName;
+  
+  // works, but all output gets dumped to Fausty's stdout... nasty
+  // also can't kill the process when its going...
+  //Glib::spawn_command_line_async 	( command.str() );
+  
+  string workingDir = "./";
+  
+  vector<string> commandVector;
+  commandVector.push_back("./test");
+  
+  cout << "Spawning async process now..." << flush;
+  Glib::spawn_async( workingDir, commandVector, Glib::SPAWN_DO_NOT_REAP_CHILD | Glib::SPAWN_SEARCH_PATH | Glib::SPAWN_STDERR_TO_DEV_NULL | Glib::SPAWN_STDOUT_TO_DEV_NULL, sigc::mem_fun( this, &GWindow::nullSetupFunction), &pid );
+  cout << "done! Pid = " << pid << " :)" << endl;
+}
+
+void GWindow::nullSetupFunction()
+{
+  // for spawning async processes
+}
+
+void GWindow::setLocation(std::string loc)
+{
+  workingDirectory = loc;
+  cout << "Fausty: Working directory " << workingDirectory << endl;
 }
 
 void GWindow::updateDiagram()

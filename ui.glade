@@ -186,7 +186,7 @@
             </child>
             <child>
               <object class="GtkButton" id="applyButton">
-                <property name="label">gtk-apply</property>
+                <property name="label">gtk-refresh</property>
                 <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -201,7 +201,24 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="exportButton">
+              <object class="GtkButton" id="compileButton">
+                <property name="label">gtk-apply</property>
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="action_name">compileButton</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="executeButton">
                 <property name="label">gtk-execute</property>
                 <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
@@ -213,7 +230,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>

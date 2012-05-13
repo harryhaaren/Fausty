@@ -17,5 +17,9 @@ int main(int argc, char** argv)
   
   GWindow window;
   
+  // for spawning async processes later
+  std::string location = argv[0];
+  window.setLocation(location);
+  
   kit.run( window.getWindow() );
 }
