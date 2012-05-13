@@ -1,0 +1,6 @@
+.waf*
+.lock*
+.build*
+test-svg/*
+
+fausty
